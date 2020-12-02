@@ -49,7 +49,6 @@ def get_notes():
     else:
         return redirect(url_for('login'))
 
-
 @app.route('/notes/<note_id>')
 def get_note(note_id):
     a_user = db.session.query(User).filter_by(email='mstout12@uncc.edu').one()
@@ -122,7 +121,9 @@ def register():
         db.session.add(new_record)
         db.session.commit()
         session['user'] = first_name
+        print(request.form['email'])
         the_user = db.session.query(User).filter_by(email=request.form['email']).one()
+        print(the_user)
         session['user_id'] = the_user.id
         return redirect(url_for('get_notes'))
     return render_template('register.html', form=form)
@@ -150,6 +151,7 @@ def login():
         # form did not validate or GET request
         return render_template("login.html", form=login_form)
 
+@app.route('/logout', methods=['GET'])
 def logout():
     if session.get('user'):
         session.clear()

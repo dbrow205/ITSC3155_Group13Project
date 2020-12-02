@@ -24,9 +24,9 @@ class User(db.Model):
     registered_on = db.Column(db.DateTime, nullable = False)
     note = db.relationship("Note", backref="note", lazy = True)
 
-    def __init__(self, first_name, last_name, password, email):
+    def __init__(self, first_name, last_name,  email, password ):
         self.first_name = first_name
         self.last_name = last_name
-        self.password = password
         self.email = email
+        self.password = password
         self.registered_on = datetime.date.today()
