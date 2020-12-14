@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="UNCC Notes App">
-        <title>UNCC Notes App - View your Notes</title>
+        <title>Group13 Notes App - View your Notes</title>
         <!-- styles -->
         <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     </head>
@@ -17,7 +17,7 @@
         <nav>
             <a href="{{ url_for('logout') }}"> Logout </a>
         </nav>
-        <h1>Welcome {{user}} to the 49er Notes App!</h1>
+        <h1>Welcome {{user}} to the Group13 Notes App!</h1>
         <h1>Listing Notes</h1>
 
         <table>
@@ -33,6 +33,11 @@
                 <td>
                     <form action="{{ url_for('delete_note', note_id=note.id) }}" method="post">
                         <input type="submit" value="Delete">
+                    </form>
+                </td>
+                <td>
+                    <form action="{{ url_for('download_note', note_id=note.id) }}" method="post">
+                        <input type="submit" value="Download">
                     </form>
                 </td>
             </tr>

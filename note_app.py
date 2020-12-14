@@ -27,11 +27,6 @@ db.init_app(app)
 # Setup models
 with app.app_context():
     db.create_all()   # run under the app context
-
-notes = {1: {'title': 'First Note', 'text': 'This is my first note', 'date': '10-1-2020'},
-         2: {'title': 'Second Note', 'text': 'This is my second note', 'date': '10-2-2020'},
-         3: {'title': 'Third Note', 'text': 'This is my third note', 'date': '10-3-2020'}}
-
 # @app.route is a decorator. It gives the function "index" special powers.
 # In this case it makes it so anyone going to "your-url/" makes this function
 # get called. What it returns is what is shown as the web page
@@ -109,6 +104,19 @@ def delete_note(note_id):
         my_note = db.session.query(Note).filter_by(id=note_id).one()
         db.session.delete(my_note)
         db.session.commit()
+        return redirect(url_for('get_notes'))
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/notes/download/<note_id>', methods=['POST'])
+def download_note(note_id):
+    if session.get('user'):
+        fname = db.session.query(Note).filter_by(id=note_id).one().title+'.txt'
+        location = "notes/"
+        note = str(db.session.query(Note).filter_by(id=note_id).one().text)
+        f = open(location+fname, 'w')
+        f.write(note)
+        f.close()
         return redirect(url_for('get_notes'))
     else:
         return redirect(url_for('login'))
