@@ -8,7 +8,7 @@ from flask import session
 from database import db
 from models import Note as Note
 from models import User as User
-from forms import RegisterForm, LoginForm, CommentForm
+from forms import RegisterForm, LoginForm, CommentForm, SearchForm
 from models import Comment as Comment
 import bcrypt
 
@@ -229,6 +229,29 @@ def delete_comment(note_id, comment_id):
         db.session.commit()
         return redirect(url_for('get_note', note_id=note_id))
     else:
+        return redirect(url_for('login'))
+
+
+@app.route('/search', methods=['GET'])
+def search() :
+    if session.get('user') :
+        print("test search")
+        form = SearchForm()
+        return render_template('search.html', form=form)
+    else :
+        return redirect(url_for('login'))
+
+@app.route('/search_results', methods=['GET', 'POST'])
+def search_results() :
+    if session.get('user') :
+        print("test search_results")
+        form = SearchForm()
+        title = request.form['title']
+        print(title)
+        note_searched = db.session.query(Note).filter_by(title=title).one()
+        print(note_searched)
+        return redirect(url_for("get_note", note_id=note_searched.id, user=session['user']))
+    else :
         return redirect(url_for('login'))
 
 

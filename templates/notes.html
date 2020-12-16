@@ -12,7 +12,8 @@
         <nav>
             <a href="{{ url_for('index') }}"> Home </a> ||
             <a href="{{ url_for('get_notes') }}"> My Notes </a> ||
-            <a href="{{ url_for('new_note') }}">Add Note</a>
+            <a href="{{ url_for('new_note') }}">Add Note</a> ||
+            <a href="{{ url_for('search') }}">Search</a>
         </nav>
         <nav>
             <a href="{{ url_for('logout') }}"> Logout </a>
@@ -29,7 +30,11 @@
             <tr>
                 <td><a href="{{ url_for('get_note', note_id=note.id) }}">{{note.title}}</a></td>
                 <td>{{ note.date }}</td>
-                <td><a href="{{ url_for('update_note', note_id=note.id) }}">Edit</a></td>
+                <td>
+                    <form action="{{ url_for('update_note', note_id=note.id) }}">
+                        <input type="submit" value="Edit">
+                    </form>
+                </td>
                 <td>
                     <form action="{{ url_for('delete_note', note_id=note.id) }}" method="post">
                         <input type="submit" value="Delete">
