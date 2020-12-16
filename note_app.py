@@ -1,7 +1,6 @@
-
 # imports
-import os                 # os is used to get environment variables IP & PORT
-from flask import Flask   # Flask is the web app that we will customize
+import os  # os is used to get environment variables IP & PORT
+from flask import Flask  # Flask is the web app that we will customize
 from flask import render_template
 from flask import request
 from flask import redirect, url_for
@@ -13,12 +12,10 @@ from forms import RegisterForm, LoginForm, CommentForm
 from models import Comment as Comment
 import bcrypt
 
-
-
-app = Flask(__name__)     # create an app
+app = Flask(__name__)  # create an app
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flask_note_app.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS']= False
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'SE3155'
 
 #  Bind SQLAlchemy db object to this Flask app
@@ -26,7 +23,9 @@ db.init_app(app)
 
 # Setup models
 with app.app_context():
-    db.create_all()   # run under the app context
+    db.create_all()  # run under the app context
+
+
 # @app.route is a decorator. It gives the function "index" special powers.
 # In this case it makes it so anyone going to "your-url/" makes this function
 # get called. What it returns is what is shown as the web page
@@ -37,13 +36,15 @@ def index():
         return render_template('index.html', user=session['user'])
     return render_template("index.html")
 
+
 @app.route('/notes')
 def get_notes():
     if session.get('user'):
-        my_notes = db.session.query(Note).filter_by(user_id = session['user_id']).all()
+        my_notes = db.session.query(Note).filter_by(user_id=session['user_id']).all()
         return render_template('notes.html', notes=my_notes, user=session['user'])
     else:
         return redirect(url_for('login'))
+
 
 @app.route('/notes/<note_id>')
 def get_note(note_id):
@@ -54,10 +55,11 @@ def get_note(note_id):
     else:
         return redirect(url_for('login'))
 
+
 @app.route('/notes/new', methods=['GET', 'POST'])
 def new_note():
-    #a_user = {'name': 'Brandon', 'email': 'bran@uncc.edu'}
-    #print("Request method used is: ", request.method)
+    # a_user = {'name': 'Brandon', 'email': 'bran@uncc.edu'}
+    # print("Request method used is: ", request.method)
     if session.get('user'):
         if request.method == 'POST':
             title = request.form['title']
@@ -74,20 +76,21 @@ def new_note():
     else:
         return redirect(url_for('login'))
 
+
 @app.route('/notes/edit/<note_id>', methods=['GET', 'POST'])
 def update_note(note_id):
     if session.get('user'):
-        #check method used for request
+        # check method used for request
         if request.method == 'POST':
-            #get Title data
+            # get Title data
             title = request.form['title']
-            #get text data
+            # get text data
             text = request.form['noteText']
             note = db.session.query(Note).filter_by(id=note_id).one()
-            #update note data
+            # update note data
             note.title = title
             note.text = text
-            #update note in db
+            # update note in db
             db.session.add(note)
             db.session.commit()
             return redirect(url_for('get_notes'))
@@ -97,10 +100,11 @@ def update_note(note_id):
     else:
         return redirect(url_for('login'))
 
+
 @app.route('/notes/delete/<note_id>', methods=['POST'])
 def delete_note(note_id):
     if session.get('user'):
-        #retrieve note from db
+        # retrieve note from db
         my_note = db.session.query(Note).filter_by(id=note_id).one()
         db.session.delete(my_note)
         db.session.commit()
@@ -108,18 +112,20 @@ def delete_note(note_id):
     else:
         return redirect(url_for('login'))
 
+
 @app.route('/notes/download/<note_id>', methods=['POST'])
 def download_note(note_id):
     if session.get('user'):
-        fname = db.session.query(Note).filter_by(id=note_id).one().title+'.txt'
+        fname = db.session.query(Note).filter_by(id=note_id).one().title + '.txt'
         location = "notes/"
         note = str(db.session.query(Note).filter_by(id=note_id).one().text)
-        f = open(location+fname, 'w')
+        f = open(location + fname, 'w')
         f.write(note)
         f.close()
         return redirect(url_for('get_notes'))
     else:
         return redirect(url_for('login'))
+
 
 @app.route('/register', methods=['POST', 'GET'])
 def register():
@@ -137,6 +143,7 @@ def register():
         session['user_id'] = the_user.id
         return redirect(url_for('get_notes'))
     return render_template('register.html', form=form)
+
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
@@ -161,11 +168,13 @@ def login():
         # form did not validate or GET request
         return render_template("login.html", form=login_form)
 
+
 @app.route('/logout', methods=['GET'])
 def logout():
     if session.get('user'):
         session.clear()
     return redirect(url_for('index'))
+
 
 @app.route('/notes/<note_id>/comment', methods=['POST'])
 def new_comment(note_id):
@@ -185,7 +194,45 @@ def new_comment(note_id):
         return redirect(url_for('login'))
 
 
-app.run(host=os.getenv('IP', '127.0.0.1'),port=int(os.getenv('PORT', 5000)),debug=True);
+@app.route('/notes/editcomment/<comment_id>', methods=['GET', 'POST'])
+def edit_comment(comment_id):
+    if session.get('user'):
+        if request.method == 'POST':
+            # check method used for request
+            # get content of text data
+            print("hello")
+            comment_text = request.form['commentText']
+            comment = db.session.query(Comment).filter_by(id=comment_id).one()
+            # update note data
+            comment.content = comment_text
+            # update note in db
+            db.session.add(comment)
+            db.session.commit()
+            return redirect(url_for('get_note', note_id=comment.note_id))
+        if request.method == 'GET':
+            # check method used for request
+            # get content of text data
+            my_comment = db.session.query(Comment).filter_by(id=comment_id).one()
+
+            return render_template("comment.html", my_comment=my_comment, user=session['user'])
+
+    else:
+        return redirect(url_for('login'))
+
+
+@app.route("/notes/<note_id>/delete/<comment_id>", methods=['GET'])
+def delete_comment(note_id, comment_id):
+    if session.get('user'):
+        # retrieve comment from db
+        my_comment = db.session.query(Comment).filter_by(id=comment_id).one()
+        db.session.delete(my_comment)
+        db.session.commit()
+        return redirect(url_for('get_note', note_id=note_id))
+    else:
+        return redirect(url_for('login'))
+
+
+app.run(host=os.getenv('IP', '127.0.0.1'), port=int(os.getenv('PORT', 5000)), debug=True);
 # To see the web page in your web browser, go to the url,
 #   http://127.0.0.1:5000
 
